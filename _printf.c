@@ -1,8 +1,5 @@
 #include "main.h"
 
-
-void print_buffer(char buffer[], int *buff_ind);
-
 /**
  * _printf - Printf function
  * @format: format.
@@ -10,8 +7,8 @@ void print_buffer(char buffer[], int *buff_ind);
  */
 int _printf(const char *format, ...)
 {
-	int i, printed = 0, printed_chars = 0;
-	int flags, width, precision, size, buff_ind = 0;
+	int i, printed_chars = 0;
+	int buff_ind = 0;
 	va_list list;
 	char buffer[BUFF_SIZE];
 
@@ -27,41 +24,104 @@ int _printf(const char *format, ...)
 			buffer[buff_ind++] = format[i];
 			if (buff_ind == BUFF_SIZE)
 				print_buffer(buffer, &buff_ind);
-			/* write(1, &format[i], 1);*/
 			printed_chars++;
-																	}
+		}
 		else
 		{
 			print_buffer(buffer, &buff_ind);
-			flags = get_flags(format, &i);
-			width = get_width(format, &i, list);
-			precision = get_precision(format, &i, list);
-			size = get_size(format, &i);
 			++i;
-			printed = handle_print(format, &i, list, buffer,
-					flags, width, precision, size);
-			if (printed == -1)
-				return (-1);
-			printed_chars += printed;
+			printed_chars += handle_specifier(format, &i, list, buffer);
 		}
 	}
 
 	print_buffer(buffer, &buff_ind);
-
 	va_end(list);
 
 	return (printed_chars);
 }
 
 /**
- * print_buffer - Prints the contents of the buffer if it exist
- * @buffer: Array of chars
- * @buff_ind: Index at which to add next char, represents the length.
+ * handle_specifier - Handle conversion specifiers ('c', 's', '%')
+ * @format: format string.
+ * @i: pointer to the current position in the format string.
+ * @list: va_list of arguments.
+ * @buffer: output buffer.
+ * Return: the number of characters printed for this specifier.
+ */
+int handle_specifier(const char *format, int *i, va_list list, char buffer[])
+{
+	int printed = 0;
+	char spec = format[*i];
+
+	switch (spec)
+	{
+		case 'c':
+			char c = va_arg(list, int);
+
+			buffer[0] = c;
+			printed = 1;
+			break;
+
+		case 's':
+			char *str = va_arg(list, char *);
+			int len = _strlen(str);
+
+			_strcpy(buffer, str);
+			printed = len;
+			break;
+
+		case '%':
+			buffer[0] = '%';
+			printed = 1;
+			break;
+		default:
+			break;
+	}
+	return (printed);
+}
+
+/**
+ * _strlen - Calculate the length of a string.
+ * @str: string pointer
+ * Return: integer value
+ */
+int _strlen(const char *str)
+{
+	int len = 0;
+
+	while (str[len] != '\0')
+	{
+		len++;
+	}
+	return (len);
+}
+
+/**
+ * _strcpy - Copy a string to a buffer.
+ * @dest: destination
+ * @src: source
+ */
+void _strcpy(char *dest, const char *src)
+{
+	while (*src != '\0')
+	{
+		*dest = *src;
+		dest++;
+		src++;
+	}
+	*dest = '\0';
+}
+
+/**
+ * print_buffer - Prints the contents of the buffer if it exists.
+ * @buffer: something
+ * @buff_ind: something else
  */
 void print_buffer(char buffer[], int *buff_ind)
 {
 	if (*buff_ind > 0)
+	{
 		write(1, &buffer[0], *buff_ind);
-
-	*buff_ind = 0;
+		*buff_ind = 0;
+	}
 }
