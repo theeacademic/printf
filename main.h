@@ -27,6 +27,10 @@ typedef struct convert_match
 } convert_match;
 int _printf(const char *format, ...)
 int _putchar(char c);
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <limits.h>
+#include <unistd.h>
 
 #endif
